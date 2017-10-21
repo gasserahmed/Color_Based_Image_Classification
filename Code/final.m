@@ -1,0 +1,229 @@
+clc
+cd('W:\College\8th Term\Multimedia Systems\Assignments\Assignment 1\Assignment 1\Train');
+Files = dir('W:\College\8th Term\Multimedia Systems\Assignments\Assignment 1\Assignment 1\Train\*.jpg'); 
+n_coast = 60;
+n_forest = 52;
+n_highway = 40;
+n_city = 46;
+color_space=1;
+
+coast = cell(1, n_coast);
+coast_histos = cell(3, n_coast);
+
+forest = cell(1, n_forest);
+forest_histos = cell(3, n_forest);
+
+highway = cell(1, n_highway);
+highway_histos = cell(3, n_highway);
+
+city = cell(1, n_city);
+city_histos = cell(3, n_city);
+
+%getting histograms for coast
+for k = 1:n_coast 
+    myfilename = sprintf('coast (%d).jpg', k);
+    coast{k} = imread(myfilename);
+    if color_space==1
+     coast{k}=rgb2hsv(coast{k});
+    end
+    
+    Red = coast{k}(:,:,1);
+    Green = coast{k}(:,:,2);
+    Blue = coast{k}(:,:,3);
+ 
+    coast_histos{1,k}=imhist(Red);
+    coast_histos{2,k}=imhist(Green);
+    coast_histos{3,k}=imhist(Blue);
+end
+
+%getting histograms for forest
+for k = 1:n_forest
+    myfilename = sprintf('forest (%d).jpg', k);
+    forest{k} = imread(myfilename);
+    
+    if color_space==1
+    forest{k}=rgb2hsv(forest{k});
+    end
+    
+    Red = forest{k}(:,:,1);
+    Green = forest{k}(:,:,2);
+    Blue = forest{k}(:,:,3);
+ 
+    forest_histos{1,k}=imhist(Red);
+    forest_histos{2,k}=imhist(Green);
+    forest_histos{3,k}=imhist(Blue);
+end
+
+%getting histograms for highway
+for k = 1:n_highway 
+    myfilename = sprintf('highway (%d).jpg', k);
+    highway{k} = imread(myfilename); 
+    if color_space==1
+    highway{k}=rgb2hsv(highway{k});
+    end
+    
+    Red = highway{k}(:,:,1);
+    Green = highway{k}(:,:,2);
+    Blue = highway{k}(:,:,3);
+ 
+    highway_histos{1,k}=imhist(Red);
+    highway_histos{2,k}=imhist(Green);
+    highway_histos{3,k}=imhist(Blue);
+end
+
+%getting histograms for city
+for k = 1:n_city 
+    myfilename = sprintf('city (%d).jpg', k);
+    city{k} = imread(myfilename);
+    
+    if color_space==1
+     city{k}=rgb2hsv(city{k});
+    end
+    Red = city{k}(:,:,1);
+    Green = city{k}(:,:,2);
+    Blue = city{k}(:,:,3);
+ 
+    city_histos{1,k}=imhist(Red);
+    city_histos{2,k}=imhist(Green);
+    city_histos{3,k}=imhist(Blue);
+end
+
+
+%test
+cd('W:\College\8th Term\Multimedia Systems\Assignments\Assignment 1\Assignment 1\Test');
+
+n_test = 80;
+%length(Files_test);
+total=0;
+for color_space=0:1
+confuse=[0 0 0 0;0 0 0 0;0 0 0 0;0 0 0 0];
+
+for type=1:4
+    
+    switch type
+     case 1
+        cd('W:\College\8th Term\Multimedia Systems\Assignments\Assignment 1\Assignment 1\Test\coast');
+        Files_test = dir('W:\College\8th Term\Multimedia Systems\Assignments\Assignment 1\Assignment 1\Test\coast\*.jpg'); 
+        n_test=84;
+    case 2
+        cd('W:\College\8th Term\Multimedia Systems\Assignments\Assignment 1\Assignment 1\Test\city');
+        Files_test = dir('W:\College\8th Term\Multimedia Systems\Assignments\Assignment 1\Assignment 1\Test\city\*.jpg'); 
+        n_test=66;
+    case 3
+        cd('W:\College\8th Term\Multimedia Systems\Assignments\Assignment 1\Assignment 1\Test\highway');
+        Files_test = dir('W:\College\8th Term\Multimedia Systems\Assignments\Assignment 1\Assignment 1\Test\highway\*.jpg'); 
+        n_test=64;
+    case 4
+        cd('W:\College\8th Term\Multimedia Systems\Assignments\Assignment 1\Assignment 1\Test\forest');
+        Files_test = dir('W:\College\8th Term\Multimedia Systems\Assignments\Assignment 1\Assignment 1\Test\forest\*.jpg'); 
+        n_test=80;
+    end
+    total_city=0;total_coast=0;total_highway=0;total_forest=0;
+    
+    for k = 1:n_test 
+    test = imread(Files_test(k).name); 
+    
+    if color_space==1
+       test=rgb2hsv(test);
+    end
+    
+    Red = test(:,:,1);
+    Green = test(:,:,2);
+    Blue = test(:,:,3);
+ 
+    Redh=imhist(Red);
+    Greenh=imhist(Green);
+    Blueh=imhist(Blue);
+    
+    ans_coast=inf; ans_forest=inf; ans_city=inf; ans_highway=inf;
+    
+    %test coasts
+    for c = 1:n_coast 
+    x=abs(Redh-coast_histos{1,c});
+    x=sum(x)/256;
+    
+    y=abs(Greenh-coast_histos{2,c});
+    y=sum(y)/256;
+
+    z=abs(Blueh-coast_histos{3,c});
+    z=sum(z)/256;
+    ans_coast=min(x+y+z,ans_coast);
+    end
+    
+      %test forests
+    for f = 1:n_forest 
+    x=abs(Redh-forest_histos{1,f});
+    x=sum(x)/256;
+    
+    y=abs(Greenh-forest_histos{2,f});
+    y=sum(y)/256;
+
+    z=abs(Blueh-forest_histos{3,f});
+    z=sum(z)/256;
+    ans_forest=min(x+y+z,ans_forest);
+    end
+    
+     %test cities
+    for s = 1:n_city 
+    x=abs(Redh-city_histos{1,s});
+    x=sum(x)/256;
+    
+    y=abs(Greenh-city_histos{2,s});
+    y=sum(y)/256;
+
+    z=abs(Blueh-city_histos{3,s});
+    z=sum(z)/256;
+    ans_city=min(x+y+z,ans_city);
+    end
+    
+      %test highways
+    for h = 1:n_highway 
+    x=abs(Redh-highway_histos{1,h});
+    x=sum(x)/256;
+    
+    y=abs(Greenh-highway_histos{2,h});
+    y=sum(y)/256;
+
+    z=abs(Blueh-highway_histos{3,h});
+    z=sum(z)/256;
+    ans_highway=min(x+y+z,ans_highway);
+    end
+    
+    ans=[ans_highway ans_city ans_forest ans_coast];
+    min_ans=min(ans);
+    %Files_test(k).name;
+    
+    switch min_ans
+    case ans_highway
+                total_highway=total_highway+1;
+        %disp('highway');
+    case ans_city
+        total_city=total_city+1;
+        %disp('city');
+        
+    case ans_coast
+        total_coast=total_coast+1;
+        %disp('coast');
+        
+    case ans_forest
+      total_forest=total_forest+1;
+        %disp('forest');
+    end
+    end
+  
+    confuse(type,1)=total_coast;
+    confuse(type,2)=total_city;
+    confuse(type,3)=total_highway;
+    confuse(type,4)=total_forest;
+    
+    
+end
+
+    
+  confuse  
+end
+
+
+
+
+
